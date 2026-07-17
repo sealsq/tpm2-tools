@@ -418,7 +418,7 @@ static void init_mldsa_public(TPM2B_PUBLIC *public, UINT16 parameter_set){
 			.authPolicy = auth_policy,
 			.parameters.mldsaDetail = {
 				.parameterSet = parameter_set,
-				.allowExternalMu = 1,
+				.allowExternalMu = (attrs & TPMA_OBJECT_RESTRICTED) ? 0 : 1,
 			},
 			.unique.mldsa = {
 				.size = 0,
@@ -604,6 +604,16 @@ static alg_parser_rc handle_scheme(const char *scheme, TPM2B_PUBLIC *public) {
         return handle_scheme_sign(scheme, public);
     case TPM2_ALG_KEYEDHASH:
         return handle_scheme_keyedhash(scheme, public);
+    case TPM2_ALG_MLDSA:
+        if (!scheme || scheme[0] == '\0') {
+            scheme = "null";
+        }
+
+        if (!strcmp(scheme, "null")) {
+            return alg_parser_rc_done;
+        }
+        return alg_parser_rc_error;
+        
     default:
         return alg_parser_rc_error;
     }
