@@ -551,7 +551,35 @@ void tpm2_util_tpmt_public_to_yaml(TPMT_PUBLIC *public, char *indent) {
         print_sym(&e->symmetric, indent);
     }
         break;
+    case TPM2_ALG_MLDSA: {
+        TPMS_MLDSA_PARMS *m = &public->parameters.mldsaDetail;
+
+        tpm2_tool_output("%sparameter-set:\n", indent);
+
+        switch (m->parameterSet) {
+            case TPM2_MLDSA_PARMS_44:
+                tpm2_tool_output("%s  value: mldsa44\n", indent);
+                break;
+            case TPM2_MLDSA_PARMS_65:
+                tpm2_tool_output("%s  value: mldsa65\n", indent);
+                break;
+            case TPM2_MLDSA_PARMS_87:
+                tpm2_tool_output("%s  value: mldsa87\n", indent);
+                break;
+            default:
+                tpm2_tool_output("%s  value: unknown\n", indent);
+                break;
+        }
+
+        tpm2_tool_output("%s  raw: 0x%x\n", indent, m->parameterSet);
+
+        tpm2_tool_output("%sallow-external-mu:\n", indent);
+        tpm2_tool_output("%s  value: %s\n",
+            indent, m->allowExternalMu ? "yes" : "no");
+        tpm2_tool_output("%s  raw: %u\n",
+            indent, m->allowExternalMu);
     }
+        break; 
 
     tpm2_util_keydata keydata = TPM2_UTIL_KEYDATA_INIT
     ;
