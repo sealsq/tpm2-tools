@@ -419,6 +419,14 @@ static void init_mldsa_public(TPM2B_PUBLIC *public, UINT16 parameter_set){
 			.parameters.mldsaDetail = {
 				.parameterSet = parameter_set,
 				.allowExternalMu = 1,
+			},
+			.unique.mldsa = {
+				.size = 0,
+			},
+		},
+	};
+}
+
 static void init_hash_mldsa_public(TPM2B_PUBLIC *public, UINT16 parameter_set, TPMI_ALG_HASH hash_alg){
 
     TPMI_ALG_HASH name_alg = public->publicArea.nameAlg;
