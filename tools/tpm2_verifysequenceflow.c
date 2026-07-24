@@ -414,4 +414,4 @@ static tool_rc tpm2_tool_onstop(ESYS_CONTEXT *ectx) {
 
 
 // Register this tool with tpm2_tool.c
-TPM2_TOOL_REGISTER("verifysequence", tpm2_tool_onstart, tpm2_tool_onrun, tpm2_tool_onstop, NULL)
+TPM2_TOOL_REGISTER("verifysequenceflow", tpm2_tool_onstart, tpm2_tool_onrun, tpm2_tool_onstop, NULL)
