@@ -418,7 +418,7 @@ static void init_mldsa_public(TPM2B_PUBLIC *public, UINT16 parameter_set){
 			.authPolicy = auth_policy,
 			.parameters.mldsaDetail = {
 				.parameterSet = parameter_set,
-				.allowExternalMu = 1,
+				.allowExternalMu = TPM2_YES,
 			},
 			.unique.mldsa = {
 				.size = 0,
@@ -540,17 +540,17 @@ static alg_parser_rc handle_mldsa(const char *ext, TPM2B_PUBLIC *public){
 	
 	if(!strcmp(ext, "44")){
 		init_mldsa_public(public, TPM2_MLDSA_PARMS_44);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	if(!strcmp(ext, "65")){
 		init_mldsa_public(public, TPM2_MLDSA_PARMS_65);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	if(!strcmp(ext, "87")){
 		init_mldsa_public(public, TPM2_MLDSA_PARMS_87);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	return alg_parser_rc_error;
@@ -654,6 +654,27 @@ static alg_parser_rc handle_scheme_keyedhash(const char *scheme,
     return alg_parser_rc_done;
 }
 
+static alg_parser_rc handle_scheme_mldsa(const char *scheme,
+        TPM2B_PUBLIC *public) {
+
+    if (!scheme || strcmp(scheme, "null") == 0) {
+        public->publicArea.parameters.mldsaDetail.allowExternalMu = TPM2_YES;
+        return alg_parser_rc_done;
+    }
+
+    if (strcmp(scheme, "mu") == 0) {
+        public->publicArea.parameters.mldsaDetail.allowExternalMu = TPM2_YES;
+        return alg_parser_rc_done;
+    }
+
+    if (strcmp(scheme, "nomu") == 0) {
+        public->publicArea.parameters.mldsaDetail.allowExternalMu = TPM2_NO;
+        return alg_parser_rc_done;
+    }
+
+    return alg_parser_rc_error;
+}
+
 static alg_parser_rc handle_scheme(const char *scheme, TPM2B_PUBLIC *public) {
 
     switch (public->publicArea.type) {
@@ -662,6 +683,8 @@ static alg_parser_rc handle_scheme(const char *scheme, TPM2B_PUBLIC *public) {
         return handle_scheme_sign(scheme, public);
     case TPM2_ALG_KEYEDHASH:
         return handle_scheme_keyedhash(scheme, public);
+    case TPM2_ALG_MLDSA:
+        return handle_scheme_mldsa(scheme, public);
     default:
         return alg_parser_rc_error;
     }
