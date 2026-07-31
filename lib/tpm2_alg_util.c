@@ -48,8 +48,8 @@ static void tpm2_alg_util_for_each_alg(alg_iter iterator, void *userdata) {
         { .name = "rsa", .id = TPM2_ALG_RSA, .flags = tpm2_alg_util_flags_asymmetric|tpm2_alg_util_flags_base },
         { .name = "ecc", .id = TPM2_ALG_ECC, .flags = tpm2_alg_util_flags_asymmetric|tpm2_alg_util_flags_base },
         { .name = "mlkem", .id = TPM2_ALG_MLKEM, .flags  = tpm2_alg_util_flags_symmetric | tpm2_alg_util_flags_base},
-        { .name = "mldsa", .id = TPM2_ALG_MLDSA, .flags  = tpm2_alg_util_flags_sig},
-        { .name = "hash_mldsa", .id = TPM2_ALG_HASH_MLDSA, .flags = tpm2_alg_util_flags_asymmetric | tpm2_alg_util_flags_base },
+        { .name = "mldsa", .id = TPM2_ALG_MLDSA, .flags  = tpm2_alg_util_flags_asymmetric | tpm2_alg_util_flags_sig},
+        { .name = "hash_mldsa", .id = TPM2_ALG_HASH_MLDSA, .flags = tpm2_alg_util_flags_asymmetric | tpm2_alg_util_flags_base | tpm2_alg_util_flags_sig },
 
         // Symmetric
         { .name = "tdes", .id = TPM2_ALG_TDES, .flags = tpm2_alg_util_flags_symmetric },
