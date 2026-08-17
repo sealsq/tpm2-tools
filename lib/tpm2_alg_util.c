@@ -515,17 +515,17 @@ static alg_parser_rc handle_mlkem(const char *ext, TPM2B_PUBLIC *public){
 	
 	if(!strcmp(ext, "512")){
 		init_mlkem_public(public, TPM2_MLKEM_PARMS_512);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	if(!strcmp(ext, "768")){
 		init_mlkem_public(public, TPM2_MLKEM_PARMS_768);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	if(!strcmp(ext, "1024")){
 		init_mlkem_public(public, TPM2_MLKEM_PARMS_1024);
-		return alg_parser_rc_done;
+		return alg_parser_rc_continue;
 	}
 	
 	return alg_parser_rc_error;
@@ -705,12 +705,16 @@ static alg_parser_rc handle_asym_detail(const char *detail,
     switch (public->publicArea.type) {
     case TPM2_ALG_RSA:
     case TPM2_ALG_ECC:
+    case TPM2_ALG_MLKEM:
 
         if (!detail || detail[0] == '\0') {
             detail = is_restricted || is_rsapps ? "aes128cfb" : "null";
         }
 
         TPMT_SYM_DEF_OBJECT *s = &public->publicArea.parameters.symDetail.sym;
+        if (public->publicArea.type == TPM2_ALG_MLKEM) {
+            s = &public->publicArea.parameters.mlkemDetail.symmetric;
+        }
 
         if (!strncmp(detail, "aes", 3)) {
             s->algorithm = TPM2_ALG_AES;
@@ -727,6 +731,7 @@ static alg_parser_rc handle_asym_detail(const char *detail,
             return alg_parser_rc_done;
         }
         /* no default */
+        break;
     }
 
     return alg_parser_rc_error;
@@ -807,8 +812,11 @@ bool tpm2_alg_util_handle_ext_alg(const char *alg_spec, TPM2B_PUBLIC *public) {
                 return false;
             }
 
-            symdetail = scheme;
-            scheme = NULL;
+            if (scheme) {
+                /* shuffle scheme into symdetail only if scheme is present */
+                symdetail = scheme;
+                scheme = NULL;
+            }
             continue;
         }
 
