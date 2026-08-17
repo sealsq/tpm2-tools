@@ -557,6 +557,33 @@ void tpm2_util_tpmt_public_to_yaml(TPMT_PUBLIC *public, char *indent) {
         print_sym(&e->symmetric, indent);
     }
         break;
+    case TPM2_ALG_MLKEM: {
+        TPMS_MLKEM_PARMS *m = &public->parameters.mlkemDetail;
+
+        tpm2_tool_output("%sparameter-set:\n", indent);
+
+        switch (m->parameterSet) {
+            case TPM2_MLKEM_PARMS_512:
+                tpm2_tool_output("%s  value: mlkem512\n", indent);
+                break;
+            case TPM2_MLKEM_PARMS_768:
+                tpm2_tool_output("%s  value: mlkem768\n", indent);
+                break;
+            case TPM2_MLKEM_PARMS_1024:
+                tpm2_tool_output("%s  value: mlkem1024\n", indent);
+                break;
+            default:
+                tpm2_tool_output("%s  value: unknown\n", indent);
+                break;
+        }
+
+        tpm2_tool_output("%s  raw: 0x%x\n", indent, m->parameterSet);
+
+        if (m->symmetric.algorithm != TPM2_ALG_NULL) {
+            print_sym(&m->symmetric, indent);
+        }
+    }
+        break;    
     case TPM2_ALG_MLDSA: {
         TPMS_MLDSA_PARMS *m = &public->parameters.mldsaDetail;
 
