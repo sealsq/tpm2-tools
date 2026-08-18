@@ -194,8 +194,10 @@ static tool_rc process_output(ESYS_CONTEXT *ectx){
 	
 	UNUSED(ectx);
 	
-	if (!files_save_ticket(ctx.validation, ctx.validation_path)) {
-		return tool_rc_general_error;
+	if(ctx.validation_path) {
+		if (!files_save_ticket(ctx.validation, ctx.validation_path)) {
+			return tool_rc_general_error;
+		}
 	}
 	
 	return tool_rc_success;

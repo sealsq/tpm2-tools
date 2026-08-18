@@ -234,9 +234,11 @@ static tool_rc verify_sequence_complete(ESYS_CONTEXT *ectx, TPMT_SIGNATURE *sign
 		return tool_rc_general_error;
 	}
 	
-	if (!files_save_ticket(validation, ctx.ticket_file)) {
-		Esys_Free(validation);
-		return tool_rc_general_error;
+	if(ctx.ticket_file) {
+		if (!files_save_ticket(validation, ctx.ticket_file)) {
+			Esys_Free(validation);
+			return tool_rc_general_error;
+		}
 	}
 	
 	tpm2_tool_output("signature verified\n");
