@@ -376,6 +376,80 @@ out:
     return pkey;
 }
 
+EVP_PKEY *convert_pubkey_MLKEM(TPMT_PUBLIC *public) {
+#if OPENSSL_VERSION_NUMBER < 0x30000000L
+    UNUSED(public);
+    LOG_ERR("ML-KEM PEM/DER export requires OpenSSL 3.0 or newer");
+    return NULL;
+#else
+    const char *key_type;
+    OSSL_PARAM_BLD *build = NULL;
+    OSSL_PARAM *params = NULL;
+    EVP_PKEY_CTX *ctx = NULL;
+    EVP_PKEY *pkey = NULL;
+    const TPM2B *tpm_key = (const TPM2B *)&public->unique.mlkem;
+
+    switch (public->parameters.mlkemDetail.parameterSet) {
+    case TPM2_MLKEM_PARMS_512:
+        key_type = "ML-KEM-512";
+        break;
+    case TPM2_MLKEM_PARMS_768:
+        key_type = "ML-KEM-768";
+        break;
+    case TPM2_MLKEM_PARMS_1024:
+        key_type = "ML-KEM-1024";
+        break;
+    default:
+        LOG_ERR("Unsupported ML-KEM parameter set 0x%x",
+                public->parameters.mlkemDetail.parameterSet);
+        return NULL;
+    }
+
+    if (tpm_key->size == 0) {
+        LOG_ERR("ML-KEM public key is empty");
+        return NULL;
+    }
+
+    build = OSSL_PARAM_BLD_new();
+    if (!build) {
+        print_ssl_error("Failed to allocate OpenSSL parameters");
+        goto out;
+    }
+
+    if (!OSSL_PARAM_BLD_push_octet_string(build, OSSL_PKEY_PARAM_PUB_KEY,
+            tpm_key->buffer, tpm_key->size)) {
+        print_ssl_error("Failed to set the ML-KEM public key");
+        goto out;
+    }
+
+    params = OSSL_PARAM_BLD_to_param(build);
+    if (!params) {
+        print_ssl_error("Failed to build OpenSSL parameters");
+        goto out;
+    }
+
+    ctx = EVP_PKEY_CTX_new_from_name(NULL, key_type, NULL);
+    if (!ctx) {
+        LOG_ERR("OpenSSL does not provide %s; ML-KEM PEM/DER export requires "
+                "OpenSSL 3.5 or newer", key_type);
+        goto out;
+    }
+
+    if (EVP_PKEY_fromdata_init(ctx) <= 0 ||
+            EVP_PKEY_fromdata(ctx, &pkey, EVP_PKEY_PUBLIC_KEY, params) <= 0) {
+        print_ssl_error("Failed to create the ML-KEM public key");
+        EVP_PKEY_free(pkey);
+        pkey = NULL;
+    }
+
+out:
+    EVP_PKEY_CTX_free(ctx);
+    OSSL_PARAM_free(params);
+    OSSL_PARAM_BLD_free(build);
+    return pkey;
+#endif
+}
+
 static bool tpm2_convert_pubkey_bio(TPMT_PUBLIC *public,
         tpm2_convert_pubkey_fmt format, BIO *bio) {
 
@@ -388,6 +462,9 @@ static bool tpm2_convert_pubkey_bio(TPMT_PUBLIC *public,
         break;
     case TPM2_ALG_ECC:
         pubkey = convert_pubkey_ECC(public);
+        break;
+    case TPM2_ALG_MLKEM:
+        pubkey = convert_pubkey_MLKEM(public);
         break;
     default:
         LOG_ERR("Unsupported key type for requested output format.");

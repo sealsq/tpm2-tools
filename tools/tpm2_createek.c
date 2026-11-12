@@ -166,6 +166,10 @@ static const alg_map alg_maps[] = {
     { "ecc_sm2",       "ecc_sm2_p256:sm4_128cfb", "sm3_256", &policy_b_sm3_256, ATTRS_B },
     { "ecc_sm2_p256",  "ecc_sm2_p256:sm4_128cfb", "sm3_256", &policy_b_sm3_256, ATTRS_B },
     { "keyedhash",     "xor", "sha256", &policy_a_sha256, ATTRS_A },
+    /* TCG EK Credential Profile v2.7 templates H-26, H-27 and H-28. */
+    { "mlkem512",      "mlkem512:aes128cfb", "sha256", &policy_b_sha256, ATTRS_B },
+    { "mlkem768",      "mlkem768:aes256cfb", "sha384", &policy_b_sha384, ATTRS_B },
+    { "mlkem1024",     "mlkem1024:aes256cfb", "sha512", &policy_b_sha512, ATTRS_B },
 };
 
 static const alg_map *lookup_alg_map(const char *alg) {

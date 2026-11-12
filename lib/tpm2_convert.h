@@ -86,6 +86,16 @@ EVP_PKEY *convert_pubkey_RSA(TPMT_PUBLIC *public);
 EVP_PKEY *convert_pubkey_ECC(TPMT_PUBLIC *public);
 
 /**
+ * Converts the given ML-KEM public key structure into the EVP_PKEY.
+ *
+ * @param public
+ *  TPM2 public key structure.
+ * @return
+ *  OpenSSL key structure, or NULL on error.
+ */
+EVP_PKEY *convert_pubkey_MLKEM(TPMT_PUBLIC *public);
+
+/**
  * Parses the given command line signature format option string and returns
  * the corresponding signature_format enum value.
  *

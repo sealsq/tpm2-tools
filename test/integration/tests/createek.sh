@@ -53,4 +53,12 @@ tpm2 createek -t -G rsa -u ek.pub -c ek.ctx
 
 cleanup "no-shut-down"
 
+# Create ML-KEM endorsement keys.
+for alg in mlkem512 mlkem768 mlkem1024; do
+    tpm2 createek -G "$alg" -u ek.pub -c ek.ctx -R
+    tpm2 readpublic -c ek.ctx -o ek.pub
+done
+
+cleanup "no-shut-down"
+
 exit 0
